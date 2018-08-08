@@ -26,12 +26,12 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import styles from '../List/TableList.less';
 import { Link } from '../../../node_modules/dva/router';
 
-@connect(({ tenant, loading }) => ({
-  tenant: tenant.tenants,
-  loading: loading.models.rule,
+@connect(({ subscriptions, loading }) => ({
+    subscriptions: subscriptions.data,
+    loading: loading.models.rule,
 }))
 
-export default class TenantsList extends PureComponent {
+export default class SubscriptionsList extends PureComponent {
 
   state = {
     modalVisible: false,
@@ -41,13 +41,13 @@ export default class TenantsList extends PureComponent {
   };
 
   componentDidMount() {
-    this.fetchTenantData();
+    this.fetchSubscriptionsData();
   }
 
-  fetchTenantData = (p = 1)=>{
+  fetchSubscriptionsData = (p = 1)=>{
     const { dispatch } = this.props;
     dispatch({
-      type: 'tenant/fetchList',
+      type: 'subscriptions/fetchList',
       payload: {
         page: p,
         page_size: 10,
@@ -77,17 +77,18 @@ export default class TenantsList extends PureComponent {
     
     this.fetchTenantData();
   }
+  
 
   render() {
     const {
-      tenant,
+        subscriptions,
       loading,
     } = this.props;
     
     const paginationProps = {
       showQuickJumper: true,
       pageSize: 10,
-      total: tenant.count > 0 ? tenant.count : 0,
+      total: subscriptions.count > 0 ? subscriptions.count : 0,
       onChange: this.onChangePage,
     };
 
@@ -111,30 +112,15 @@ export default class TenantsList extends PureComponent {
 
     const columns = [
       {
-        title: '客户名称',
-        dataIndex: 'name',
-        key: 'name',
+        title: '订阅客户名称',
+        dataIndex: 'tenantId',
+        key: 'tenantId',
         render: (text, record) => <Link to={`/tenants/${record.id}`}>{text}</Link>,
       },
       {
-        title: '描述',
-        dataIndex: 'description',
-        key: 'description',
-      },
-      {
-        title: '地区',
-        dataIndex: 'region',
-        key: 'region',
-      },
-      {
-        title: '联系人',
-        dataIndex: 'contact',
-        key: 'contact',
-      },
-      {
-        title: '手机号',
-        dataIndex: 'phone',
-        key: 'phone',
+        title: '订阅产品名称',
+        dataIndex: 'productionId',
+        key: 'productionId',
       },
       {
         title: '到期时间',
@@ -146,7 +132,7 @@ export default class TenantsList extends PureComponent {
         title: '操作',
         render: (record) => (
           <Fragment>
-            <Link to={`/tenants/edit/${record.id}`}>编辑</Link>
+            <Link to='/subscriptions/add'>编辑</Link>
             <Divider type="vertical" />
             <MoreBtn id={record.id}/>
           </Fragment>
@@ -155,11 +141,11 @@ export default class TenantsList extends PureComponent {
     ];
 
     return (
-      <PageHeaderLayout title="客户列表">
+      <PageHeaderLayout title="订阅列表">
         <Card bordered={false}>
           <div className={styles.tableList}>
             <div className={styles.tableListOperator}>
-              <Link to='/tenants/add'>
+              <Link to='/subscriptions/add'>
               <Button icon="plus" type="primary">
                 新建
               </Button></Link>
@@ -169,7 +155,7 @@ export default class TenantsList extends PureComponent {
             loading={loading}
             // rowKey={rowKey || 'key'}
             // rowSelection={rowSelection}
-            dataSource={tenant.rows}
+            dataSource={subscriptions.rows}
             columns={columns}
             pagination={paginationProps}
             // onChange={this.handleTableChange}

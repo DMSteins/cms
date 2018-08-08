@@ -24,21 +24,69 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
-@connect(()=>({
-
+@connect(({ tenant, product, subscriptions })=>({
+    currentTenant: tenant.currentTenant,
+    product: product.list,
+    subsList: subscriptions.data,
 }))
 @Form.create()
-export default class AddTenant extends PureComponent {
-  agentId = "";
+export default class AddSubscription extends PureComponent {
+
   componentDidMount(){
-    const userData = getLocalStorage('KCureentUserData');
-    if(userData) this.agentId = userData.id ? userData.id : '';
+    this.fetchTenantInfo();
+    this.fetchAllSubscription();
+    this.fetchProductData();
   }
+
+  fetchAllSubscription = (p = 1)=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'subscriptions/fetchList',
+      payload: {
+        page: p,
+        page_size: 10,
+        tenant_id: this.props.match.params.id,
+      },
+    });
+  }
+
+  fetchTenantInfo = ()=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'tenant/detailTenant',
+      payload: {
+        id: this.props.match.params.id,
+      },
+    });
+  }
+
+  fetchTenantData = (p = 1)=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'tenant/fetchList',
+      payload: {
+        page: p,
+        page_size: 10,
+      },
+    });
+  }
+
+  fetchProductData = (p = 1)=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'product/fetch',
+      payload: {
+        page: p,
+        page_size: 10,
+      },
+    });
+  }
+
   addResult = (response)=>{
     if(response){
-        message.success('新建客户成功');
+        message.success('新建订阅成功');
     }else{
-        message.error('新建客户失败');
+        message.error('新建订阅失败');
     }
   }
 
@@ -46,13 +94,14 @@ export default class AddTenant extends PureComponent {
     e.preventDefault();
     const { form, dispatch } = this.props;
     form.validateFieldsAndScroll((err, values) => {
+
       if (!err) {
         dispatch({
-          type: 'tenant/addTenant',
+          type: 'subscriptions/addSubscription',
           payload: {
             ...values,
             expires: values['expires'].format('YYYY-MM-DD HH:mm:ss'),
-            agentId: this.agentId,
+            tenantId: this.props.match.params.id,
             },
           callback: this.addResult,
         });
@@ -61,14 +110,16 @@ export default class AddTenant extends PureComponent {
   };
 
   render() {
-    const { submitting, form } = this.props;
+    const { submitting, form, currentTenant, product, subsList } = this.props;
     const { getFieldDecorator } = form;
+
 
     function disabledDate(current) {
         // Can not select days before today and today
         return current && current < moment().endOf('day');
       }
 
+    
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -88,51 +139,60 @@ export default class AddTenant extends PureComponent {
       },
     };
 
+    // let rowdata = [];
+    // if(tenant.rows){
+    //     rowdata = tenant.rows;
+    // }
+    // const options = rowdata.map(d => <Option key={d.id}>{d.name}</Option>);
+    let subsArr = [];
+    if(subsList.rows){
+      subsList.rows.map(item => {
+        subsArr.push(item.productionId);
+      });
+    }
+
+    let proRowdata = [];
+    if(product.rows){
+      proRowdata = product.rows;
+    }
+    const proOptions = proRowdata.map(d => <Option key={d.id} disabled={subsArr.includes(d.id)}>{d.name}</Option>);
+
     return (
       <PageHeaderLayout
-        title="新增客户"
+        title="新增订阅"
       >
         <Card bordered={false}>
           <Form onSubmit={this.handleSubmit} hideRequiredMark style={{ marginTop: 8 }}>
-            <FormItem {...formItemLayout} label="名称">
-              {getFieldDecorator('name', {
+            <FormItem {...formItemLayout} label="订阅客户名称">
+              {getFieldDecorator('tenantName', {
                 rules: [
                   {
                     required: true,
                     message: '客户名称不可为空',
                   },
                 ],
-
-              })(<Input placeholder="客户名称" />)}
-            </FormItem>
-            <FormItem {...formItemLayout} label="描述">
-              {getFieldDecorator('description',{
+                initialValue: currentTenant.name ? currentTenant.name : "",
               })(
-                <TextArea
-                  style={{ minHeight: 32 }}
-                  placeholder="客户描述"
-                  rows={4}
-                />
+                <Input placeholder="客户名称" disabled={true} />
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="地区">
-              {getFieldDecorator('region')(
-                <Input placeholder="客户地区"/>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="详细地址">
-              {getFieldDecorator('location')(
-                <Input placeholder="客户详细地址"/>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="联系人">
-              {getFieldDecorator('contact')(
-                <Input placeholder="客户联系人称呼"/>
-              )}
-            </FormItem>
-            <FormItem {...formItemLayout} label="手机号">
-              {getFieldDecorator('phone')(
-                <Input placeholder="客户手机号"/>
+            <FormItem {...formItemLayout} label="订阅产品名称">
+              {getFieldDecorator('productionId',{
+              })(
+                <Select
+                showSearch
+                // value={tenant.rows}
+                placeholder={this.props.placeholder}
+                style={this.props.style}
+                defaultActiveFirstOption={false}
+                showArrow={false}
+                filterOption={false}
+                // onSearch={this.handleSearch}
+                // onChange={this.handleChange}
+                notFoundContent={null}
+              >
+                {proOptions}
+              </Select>
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="到期时间">
@@ -152,19 +212,11 @@ export default class AddTenant extends PureComponent {
               />
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="上限数量">
-              {getFieldDecorator('limit',{
-                  initialValue: 100,
-              })(
-                <InputNumber min={0} placeholder="上限数量"/>
-              )}
-            </FormItem>
             <FormItem {...submitFormLayout} style={{ marginTop: 32 }}>
               <Button type="primary" htmlType="submit" loading={submitting}>
                 新建
               </Button>
             </FormItem>
-
           </Form>
         </Card>
       </PageHeaderLayout>

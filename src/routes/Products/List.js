@@ -17,6 +17,7 @@ import {
   Popconfirm,
   Form,
   Modal,
+  Divider,
 } from 'antd';
 
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
@@ -178,7 +179,7 @@ export default class ProductList extends PureComponent {
     );
 
     return (
-      <PageHeaderLayout>
+      <PageHeaderLayout title="产品列表">
         <div className={styles.standardList}>
 
           <Card
@@ -187,13 +188,19 @@ export default class ProductList extends PureComponent {
             title=""
             style={{ marginTop: 24 }}
             bodyStyle={{ padding: '0 32px 40px 32px' }}
-            extra={extraContent}
+            // extra={extraContent}
           >
-            <Button type="dashed" style={{ width: '100%', marginBottom: 8 }} icon="plus"
+          <div className={styles.tableListOperator}>
+              <Button icon="plus" type="primary" onClick={this.showModal}>
+                新建
+              </Button>
+            </div>
+            <Divider style={{ marginBottom: 0 }} />
+            {/* <Button type="dashed" style={{ width: '100%', marginBottom: 8 }} icon="plus"
             onClick={this.showModal}
             >
               添加
-            </Button>
+            </Button> */}
             <List
               size="large"
               loading={loading}

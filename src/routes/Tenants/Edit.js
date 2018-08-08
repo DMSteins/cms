@@ -24,44 +24,53 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
-@connect(()=>({
-
+@connect(({ tenant })=>({
+  currentTenant: tenant.currentTenant,
 }))
 @Form.create()
 export default class EditTenant extends PureComponent {
   agentId = "";
   componentDidMount(){
-    const userData = getLocalStorage('KCureentUserData');
-    if(userData) this.agentId = userData.id ? userData.id : '';
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'tenant/detailTenant',
+      payload: {
+        id: this.props.match.params.id,
+      }
+    });
   }
   addResult = (response)=>{
-    if(response){
-        message.success('新建客户成功');
-    }else{
-        message.error('新建客户失败');
-    }
+    /** 由于修改信息，后台不返回结果，所以直接显示成功*/
+    // if(response){
+        message.success('修改客户信息成功');
+    // }else{
+    //     message.error('修改客户信息失败');
+    // }
   }
 
   handleSubmit = e => {
+    console.log(111);
     e.preventDefault();
     const { form, dispatch } = this.props;
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         dispatch({
-          type: 'tenant/addTenant',
+          type: 'tenant/edit',
           payload: {
             ...values,
             expires: values['expires'].format('YYYY-MM-DD HH:mm:ss'),
-            agentId: this.agentId,
+            id: this.props.match.params.id,
             },
           callback: this.addResult,
         });
+      }else{
+        console.log(err);
       }
     });
   };
 
   render() {
-    const { submitting, form } = this.props;
+    const { submitting, form, currentTenant } = this.props;
     const { getFieldDecorator } = form;
 
     function disabledDate(current) {
@@ -90,7 +99,7 @@ export default class EditTenant extends PureComponent {
 
     return (
       <PageHeaderLayout
-        title="新增客户"
+        title="编辑客户信息"
       >
         <Card bordered={false}>
           <Form onSubmit={this.handleSubmit} hideRequiredMark style={{ marginTop: 8 }}>
@@ -102,11 +111,12 @@ export default class EditTenant extends PureComponent {
                     message: '客户名称不可为空',
                   },
                 ],
-
+                initialValue: currentTenant.name ? currentTenant.name : "",
               })(<Input placeholder="客户名称" />)}
             </FormItem>
             <FormItem {...formItemLayout} label="描述">
               {getFieldDecorator('description',{
+                initialValue: currentTenant.description ? currentTenant.description : "",
               })(
                 <TextArea
                   style={{ minHeight: 32 }}
@@ -116,22 +126,30 @@ export default class EditTenant extends PureComponent {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="地区">
-              {getFieldDecorator('region')(
+              {getFieldDecorator('region', {
+                initialValue: currentTenant.region ? currentTenant.region : "",
+              })(
                 <Input placeholder="客户地区"/>
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="详细地址">
-              {getFieldDecorator('location')(
+              {getFieldDecorator('location', {
+                initialValue: currentTenant.location ? currentTenant.location : "",
+              })(
                 <Input placeholder="客户详细地址"/>
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="联系人">
-              {getFieldDecorator('contact')(
+              {getFieldDecorator('contact', {
+                initialValue: currentTenant.contact ? currentTenant.contact : "",
+              })(
                 <Input placeholder="客户联系人称呼"/>
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="手机号">
-              {getFieldDecorator('phone')(
+              {getFieldDecorator('phone', {
+                initialValue: currentTenant.phone ? currentTenant.phone : "",
+              })(
                 <Input placeholder="客户手机号"/>
               )}
             </FormItem>
@@ -143,6 +161,8 @@ export default class EditTenant extends PureComponent {
                     message: '到期时间不可为空',
                   },
                 ],
+                /**由于时区问题多加一层moment转换 */
+                initialValue:  moment(moment(currentTenant.expires).format('YYYY-MM-DD HH:mm:ss')) ,
               })(
                 <DatePicker
                 format="YYYY-MM-DD HH:mm:ss"
@@ -154,7 +174,7 @@ export default class EditTenant extends PureComponent {
             </FormItem>
             <FormItem {...formItemLayout} label="上限数量">
               {getFieldDecorator('limit',{
-                  initialValue: 100,
+                  initialValue: currentTenant.limit ? currentTenant.limit : "",
               })(
                 <InputNumber min={0} placeholder="上限数量"/>
               )}
@@ -164,7 +184,6 @@ export default class EditTenant extends PureComponent {
                 保存
               </Button>
             </FormItem>
-
           </Form>
         </Card>
       </PageHeaderLayout>

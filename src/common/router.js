@@ -187,7 +187,19 @@ export const getRouterData = app => {
       component: dynamicWrapper(app, [], () => import('../routes/Tenants/Add')),
     },
     '/tenants/:id': {
-      component: dynamicWrapper(app, ['tenant'], () => import('../routes/Tenants/Detail')),
+      component: dynamicWrapper(app, ['tenant', 'subscriptions'], () => import('../routes/Tenants/Detail')),
+    },
+    '/tenants/edit/:id': {
+      component: dynamicWrapper(app, ['tenant'], () => import('../routes/Tenants/Edit')),
+    },
+    '/subscriptions/list': {
+      component: dynamicWrapper(app, ['subscriptions'], () => import('../routes/subscriptions/List')),
+    },
+    '/subscriptions/add/:id': {
+      component: dynamicWrapper(app, ['subscriptions', 'product', 'tenant'], () => import('../routes/subscriptions/Add')),
+    },
+    '/subscriptions/edit/:t_id/:s_id': {
+      component: dynamicWrapper(app, ['subscriptions', 'product', 'tenant'], () => import('../routes/subscriptions/Edit')),
     },
     // '/user/:id': {
     //   component: dynamicWrapper(app, [], () => import('../routes/User/SomeComponent')),

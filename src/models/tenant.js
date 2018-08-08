@@ -1,4 +1,4 @@
-import { getTenantsList, addTenant, getTenantData } from '../services/api';
+import { getTenantsList, addTenant, getTenantData, deleteTenant, editTenant } from '../services/api';
 import {routerRedux} from 'dva/router';
 
 export default {
@@ -24,8 +24,19 @@ export default {
         },
         *detailTenant({payload, callback}, {call, put}){
             const response =  yield call(getTenantData, payload);
+            yield put({
+                type: 'currentTenant',
+                payload: response,
+              });
+        },
+        *deleteTenant({payload, callback}, {call, put}){
+            const response =  yield call(deleteTenant, payload);
             if(callback) callback(response);
-            yield put(routerRedux.push('/tenants/list'));
+        },
+        *edit({ payload, callback }, { call, put }){
+            const response = yield call(editTenant, payload);
+            console.log(response);
+            if (callback) callback(response);
         },
 
     },
@@ -35,6 +46,12 @@ export default {
             return {
                 ...state,
                 tenants: action.payload,
+            }
+        },
+        currentTenant(state, action){
+            return {
+                ...state,
+                currentTenant: action.payload,
             }
         },
 

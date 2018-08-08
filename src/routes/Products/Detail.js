@@ -69,6 +69,10 @@ export default class DetailProduct extends PureComponent {
     this.formRef = formRef;
   }
 
+  saveAddFormRef = (ref)=>{
+    this.addFromRef = ref;
+  }
+
   createResult= (params)=>{
     
     if(params){
@@ -81,7 +85,7 @@ export default class DetailProduct extends PureComponent {
   }
 
   handleCreate = () => {
-    const form = this.formRef.props.form;
+    const form = this.addFromRef.props.form;
     form.validateFields((err, values) => {
       if (err) {
         return;
@@ -225,7 +229,7 @@ export default class DetailProduct extends PureComponent {
             />
         </Card>
         <ModulesCreateForm 
-        wrappedComponentRef = {this.saveFormRef}
+        wrappedComponentRef = {this.saveAddFormRef}
         visible = {this.state.visible}
         onCreate = {this.handleCreate}
         onCancel = {this.handleCancel}

@@ -176,7 +176,52 @@ export async function addTenant(params){
 }
 
 export async function getTenantData(params){
-  return request(`${urlPrefix}/modules/${params.id}`, {
+  return request(`${urlPrefix}/tenants/${params.id}`, {
     method: 'GET',
+  }, true);
+}
+
+export async function deleteTenant(params){
+  return request(`${urlPrefix}/tenants/${params.id}`, {
+    method: 'DELETE',
+  }, true);
+}
+
+export async function editTenant(params){
+  return request(`${urlPrefix}/tenants/${params.id}`, {
+    method: 'PUT',
+    body: {
+      ...params,
+    }
+  }, true);
+}
+
+export async function getSubscriptionsList(params){
+  return request(`${urlPrefix}/subscriptions?page=${params.page}&page_size=${params.page_size}&tenant_id=${params.tenant_id}`, {
+    method: 'GET',
+  }, true);
+}
+
+export async function addSubscription(params){
+  return request(`${urlPrefix}/subscriptions`, {
+    method: 'POST',
+    body: {
+      ...params,
+    }
+  }, true);
+}
+
+export async function getSubscription(params){
+  return request(`${urlPrefix}/subscriptions/${params.id}`, {
+    method: 'GET',
+  }, true);
+}
+
+export async function updateSubscription(params){
+  return request(`${urlPrefix}/subscriptions/${params.id}`, {
+    method: 'PUT',
+    body: {
+      ...params,
+    }
   }, true);
 }
