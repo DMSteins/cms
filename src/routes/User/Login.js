@@ -53,7 +53,7 @@ export default class LoginPage extends Component {
         <Login defaultActiveKey={type} onTabChange={this.onTabChange} onSubmit={this.handleSubmit}>
           <Tab key="account" tab="账户密码登录">
             {login.status === 'error' &&
-              !submitting &&
+              !submitting && login.httpCode != 500 &&
               this.renderMessage('用户名或密码错误')}
             <UserName name="account" placeholder="admin/user" />
             <Password name="password" placeholder="888888/123456" />

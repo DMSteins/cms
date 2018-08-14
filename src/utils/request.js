@@ -95,6 +95,11 @@ export default function request(url, options, requireToken=false) {
   return fetch(url, newOptions)
     .then(checkStatus)
     .then(response => {
+      if(response && response.httpStatus == 403){
+        console.log(403);
+        dispatch(routerRedux.push('user/login'));
+        return;
+      }
       if (newOptions.method === 'DELETE' || response.status === 204) {
         return response.text();
       }
@@ -115,10 +120,11 @@ export default function request(url, options, requireToken=false) {
       }
       if (status <= 504 && status >= 500) {
         dispatch(routerRedux.push('/exception/500'));
-        return;
+        return {httpCode: status};
       }
       if (status >= 404 && status < 422) {
         dispatch(routerRedux.push('/exception/404'));
       }
+      return;
     });
 }

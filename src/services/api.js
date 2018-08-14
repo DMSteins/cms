@@ -3,7 +3,7 @@ import request from '../utils/request';
 import { getLocalStorage } from '../utils/help';
 import { getAuthHeader } from '../utils/utils';
 
-const urlPrefix = 'http://59.80.34.112:4000';
+const urlPrefix = 'api';
 
 export async function queryProjectNotice() {
   return request('/api/project/notice');

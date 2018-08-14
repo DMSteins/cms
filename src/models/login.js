@@ -14,7 +14,9 @@ export default {
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
-      if(response.token){
+      console.log(response);
+      
+      if(response && response.token){
         yield put({
           type: 'changeLoginStatus',
           payload: {...response, status: 'ok'},
@@ -30,11 +32,6 @@ export default {
         reloadAuthorized();
         // yield put(routerRedux.push('/user/login'));
       }
-      // Login successfully
-      // if (response.status === 'ok') {
-      //   reloadAuthorized();
-      //   yield put(routerRedux.push('/'));
-      // }
     },
     *logout(_, { put, select }) {
       try {
@@ -66,6 +63,7 @@ export default {
         ...state,
         status: payload.status,
         type: payload.type,
+        httpCode: payload.httpCode,
       };
     },
   },
